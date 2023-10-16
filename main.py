@@ -18,6 +18,7 @@ class Player:
         self.pY = y
         self.fuel = 100
         self.angle = ang
+        self.health = 1000
 
     # Bewegung des Spielers. Man kann nicht über den Rand hinaus fahren
     def move(self, direction):
@@ -81,12 +82,12 @@ class Window(QWidget, object):
 
         ### Player Left (grün)
         self.player_left = Player(QColor(0, 150, 0, 255),
-                                  110,
+                                  100,
                                   round(int((np.sin(2 * np.pi * 110 / 1000) * 0.5 + 1) * 400/2)),
                                   -45)
 
         ### Player Right (red)
-        self.player_right = Player(QColor(180, 0, 0, 255),
+        self.player_right = Player(QColor(200, 0, 0, 255),
                                   900,
                                   round(int((np.sin(2 * np.pi * 900 / 1000) * 0.5 + 1) * 400 / 2)),
                                   -135)
@@ -116,7 +117,7 @@ class Window(QWidget, object):
         self.time = 0
 
     def onRepeat(self):
-        # Ttemporären Bild (Kopie von world_img)
+        # temporäres Bild (Kopie von world_img)
         self.temp_img = QImage(self.world_img)
 
         # Painter für temp
@@ -170,6 +171,28 @@ class Window(QWidget, object):
         # kleiner Zipfel am Rohr
         temppainter.drawRect(21, -4, 9, 9)
         # Transformation wieder zurück setzten
+        temppainter.resetTransform()
+
+
+        # Healthbar (Player Left)
+        temppainter.setBrush(Qt.black)
+        temppainter.drawRect(5,5,202,12)
+        temppainter.setBrush(self.player_left.pLColor)
+        temppainter.drawRect(6, 6, round(self.player_left.health/5), 10)
+
+        # Healthbar (Player Right)
+        temppainter.setBrush(Qt.black)
+        temppainter.drawRect(793,5,202,12)
+        temppainter.setBrush(self.player_right.pLColor)
+
+        # Healthbar muss um 180° Rotiert werden
+        fixed_x, fixed_y = (994, 6)
+        transform = QTransform()
+        transform.translate(fixed_x, fixed_y)
+        temppainter.setTransform(transform)
+        transform.rotate(180)
+        temppainter.setTransform(transform)
+        temppainter.drawRect(0, -10, round(self.player_right.health/5), 10)
         temppainter.resetTransform()
 
 
