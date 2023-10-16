@@ -84,7 +84,7 @@ class Window(QWidget, object):
         ### Player Left (grün)
         self.player_left = Player(QColor(0, 150, 0, 255),
                                   100,
-                                  round(int((np.sin(2 * np.pi * 110 / 1000) * 0.5 + 1) * 400/2)),
+                                  round(int((np.sin(2 * np.pi * 100 / 1000) * 0.5 + 1) * 400/2)),
                                   -45)
 
         ### Player Right (red)
