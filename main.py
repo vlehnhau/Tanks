@@ -10,8 +10,11 @@ import standardMap
 class Game():
     pass
 
-class Player():
-    pass
+
+class PlayerLeft():
+    pLColor = QColor(0,150,0,255)
+    pLX = 100
+    pLY = round(int((np.sin(2 * np.pi * pLX / 1000) * 0.5 + 1) * 400/2)) - 25
 
 class Window(QWidget, object):
     def __init__(self):
@@ -53,21 +56,38 @@ class Window(QWidget, object):
 
         #Hiermit werden später die Krater gezeichnet
         #Maybe Problem: Panzer werden auch überzeichnet, aber man könnte ja die Panzer dann wieder darüber malen
-        self.mappainter.drawEllipse(QPoint(50, 234), 50, 50)
+        #self.mappainter.drawEllipse(QPoint(50, 234), 50, 50)
+
+        #Test PlayerL
+        self.mappainter.setBrush(PlayerLeft.pLColor)
+        self.mappainter.drawRect(PlayerLeft.pLX-20, PlayerLeft.pLY, 40, 25)
+
         # timer
         self.timerFun()
 
         #Nur zum Testen der checkGround funktion
-        print(self.checkGround(10,10))      #False
-        print(self.checkGround(500, 399))   #True
-        print(self.checkGround(50,234))     #False
-        print(self.checkGround(10,234))     #False
-        print(self.checkGround(50, 285))    #True
+        print(self.checkHit(10,10))      #False
+        print(self.checkHit(500, 399))   #True
+        print(self.checkHit(50,234))     #False
+        print(self.checkHit(10,234))     #False
+        print(self.checkHit(50, 285))    #True
+
+        #Test für Player
+        print(PlayerLeft.pLX)
+        print(PlayerLeft.pLY)
+
+        self.kek = 0
+
 
     def onRepeat(self):
         img = self.board.toImage()
 
         self.display.setPixmap(QPixmap.fromImage(self.world_img))
+
+        self.kek += 1
+        print(self.kek)
+
+
 
 
 
@@ -82,20 +102,19 @@ class Window(QWidget, object):
 
 
 
-    def checkGround(self, x, y):
+    def checkHit(self, x, y):
         #Funktion um zu Überprüfen, ob ein Pixel Boden oder Himmel ist.
         #ABER:
         #Maybe Problem in der Zukunft: Wenn ein Panzer den Boden Überdeckt, wird der Boden nicht mehr erkannt (da die Farbe des Pixel abgefragt wird)
         #Aber: juckt mich doch nicht, Viktor muss das mit den Panzern machen hehe
         #Maybe muss man anderes Bild drüber legen oder so, KP ob QLabel das kann
+        #oder: if ... or color == Farbe Panzer
         pixel_value = self.world_img.pixel(x,y)
         color = QColor(pixel_value)
-        if color == QColor(128, 128, 128, 255):
+        if color == QColor(128, 128, 128, 255) or color == PlayerLeft.pLColor:
             return True
         else:
             return False
-
-
 
 
 

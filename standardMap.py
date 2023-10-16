@@ -17,7 +17,7 @@ y_vals = np.sin(2* np.pi * x_vals / width) * 0.5  # Sinuskurve
 # Schleife über die Pixel und setzen der Farben entsprechend der Sinuskurve
 for x in range(width):
     for y in range(height):
-        if y <= int((y_vals[x] + 1) * height/2):
+        if y <= round(int((y_vals[x] + 1) * height/2)):
             pass #world[y, x] = [137, 207, 240, 100]  # Blau für Punkte oberhalb der Sinuskurve
         else:
             world[y, x] = [128, 128, 128, 255]  # Grau für Punkte unterhalb der Sinuskurve
