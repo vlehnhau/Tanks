@@ -18,7 +18,7 @@ class Player:
         self.pY = y
         self.fuel = 100
 
-
+    # Bewegung des Spielers. Man kann nicht über den Rand hinaus fahren
     def move(self, direction):
         if self.fuel != 0:
             if direction == "RIGHT":
@@ -39,11 +39,11 @@ class Window(QWidget, object):
         super().__init__()
         super().__init__()
 
-        # timer for repeat
+        # timer
         self.timer = QTimer()
 
-        # Outer win settings
-        self.setGeometry(10, 30, 1000, 400)
+        # window settings
+        self.setGeometry(450, 250, 1000, 450)
         self.setWindowTitle("Game")
 
         self.form = QFormLayout()  # Layout
@@ -89,17 +89,27 @@ class Window(QWidget, object):
         self.mappainter.setBrush(QColor(137, 207, 240, 255))
 
         #Hiermit werden später die Krater gezeichnet
-        self.mappainter.drawEllipse(QPoint(60, 234), 50, 50)
+        #self.mappainter.drawEllipse(QPoint(60, 234), 50, 50)
+
+
+        # Statusleiste unten
+        self.statusbar = QStatusBar()
+        self.statusbar.setObjectName("statusbar")
+        self.displayState = QLabel("Grün ist dran. Fuel: 100")
+        self.statusbar.addWidget(self.displayState)
+        # self.statusbar.move(17, 420)
+        self.form.addWidget(self.statusbar)
+        self.form.addWidget(self.statusbar)
 
         # timer
         self.timerFun()
         self.time = 0
 
     def onRepeat(self):
-        # Erstellen eines temporären Bildes (Kopie von world_img)
+        # Ttemporären Bild (Kopie von world_img)
         self.temp_img = QImage(self.world_img)
 
-        # Einen QPainter für das temporäre Bild erstellen
+        # Painter für temp
         temppainter = QPainter(self.temp_img)
 
         # Player Left zeichnen
@@ -112,11 +122,18 @@ class Window(QWidget, object):
         temppainter.setBrush(self.player_right.pLColor)
         temppainter.drawRect(self.player_right.pX - 20, self.player_right.pY, 40, -25)
 
-        # Das temporäre Bild auf das Anzeigelabel setzen
+        # temp zeichnen
         self.display.setPixmap(QPixmap.fromImage(self.temp_img))
 
+        # testen ob Timer läuft (Später löschen)
         self.time += 1
         print(self.time)
+
+        # Statusleiste
+        if self.turn == "PL":
+            self.displayState.setText("Grün ist dran. Tank: " + str(self.player_left.fuel))
+        elif self.turn == "PR":
+            self.displayState.setText("Rot ist dran. Tank: " + str(self.player_right.fuel))
 
 
 
@@ -137,6 +154,7 @@ class Window(QWidget, object):
         else:
             pass
 
+        # Spiler bewegen falls möglich
         if  QKeyEvent.key() == Qt.Key.Key_Right:
             if self.checkIfMovePossible(player.pX+1, player.pY):
                 player.move("RIGHT")
@@ -146,7 +164,7 @@ class Window(QWidget, object):
                 player.move("LEFT")
                 self.fixY(player)
 
-        #Nächste Runde wenn "Space"
+        # Nächste Runde wenn "Space" (später schießen)
         elif QKeyEvent.key() == Qt.Key.Key_Space:
             if self.turn == "PL":
                 self.player_right.fuel = 100
@@ -156,7 +174,7 @@ class Window(QWidget, object):
                 self.turn = "PL"
 
 
-    #Dadurch kann man nichtmehr zu Steile Kanten hoch- oder runterfahren
+    # Dadurch kann man nichtmehr zu Steile Kanten hoch- oder runterfahren
     def checkIfMovePossible(self,x,y):                #Man kann nicht hochfahren, wenn zu Nah über einen Boden ist
         if (self.checkGround(x,y-25) == True):
             return False
@@ -178,13 +196,13 @@ class Window(QWidget, object):
     # Panzer auf die richtige Höhe bringen
     def fixY(self, player):
         fixed = False
-        if self.checkGround(player.pX,player.pY):   #Unterirdisch
+        if self.checkGround(player.pX,player.pY):   # Unterirdisch
             while fixed == False:
                 player.pY -=1
                 if self.checkGround(player.pX,player.pY) == False:
                     player.pY += 1
                     fixed = True
-        else: #fliegt
+        else: # fliegt
             while fixed == False:
                 player.pY +=1
                 if self.checkGround(player.pX,player.pY) == True:
@@ -194,7 +212,8 @@ class Window(QWidget, object):
 
 
     def checkGround(self, x, y):
-        #Auffälligkeit: Wird ein Geschoss durch einen Panzer fliegen, wird das Geschoss trotzdem erst am Boden auftreffen
+        # Auffälligkeit: Wird ein Geschoss durch einen Panzer fliegen, wird das Geschoss trotzdem erst am Boden auftreffen
+        # Aber ist ein Feature, kein Bug
         pixel_value = self.world_img.pixel(x,y)
         color = QColor(pixel_value)
         if color == QColor(128, 128, 128, 255):
