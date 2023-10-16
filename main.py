@@ -11,18 +11,24 @@ class Game():
     pass
 
 
-class PlayerLeft():
-    pLColor = QColor(0,150,0,255)
-    pLX = 100
-    pLY = round(int((np.sin(2 * np.pi * pLX / 1000) * 0.5 + 1) * 400/2))
+class Player:
+    def __init__(self, color, x, y):
+        self.pLColor = color
+        self.pLX = x
+        self.pLY = y
+        self.fuel = 100
+
 
     def move(self, direction):
-        if direction == "RIGHT":
-            if self.pLX != 1000-1:
-                self.pLX +=1
-        if direction == "LEFT":
-            if self.pLX != 1:
-                self.pLX -=1
+        if self.fuel != 0:
+            if direction == "RIGHT":
+                if self.pLX != 1000-1:
+                    self.pLX += 1
+                    self.fuel -= 1
+            if direction == "LEFT":
+                if self.pLX != 1:
+                    self.pLX -= 1
+                    self.fuel -= 1
 
 
 
@@ -61,8 +67,20 @@ class Window(QWidget, object):
         self.world = standardMap.worldData()
         self.world_img = QImage(self.world.data, 1000, 400, QImage.Format_RGBA8888)
 
-        ### Player Left (links)
-        self.player_left = PlayerLeft()
+        ### Runden
+        self.turn = "PL" #Links darf anfangen
+
+
+        ### Player Left (grün)
+        self.player_left = Player(QColor(0, 150, 0, 255),
+                                  100,
+                                  round(int((np.sin(2 * np.pi * 100 / 1000) * 0.5 + 1) * 400/2)))
+
+        ### Player Right (red)
+        self.player_right = Player(QColor(180, 0, 0, 255),
+                                  900,
+                                  round(int((np.sin(2 * np.pi * 900 / 1000) * 0.5 + 1) * 400 / 2)))
+
 
 
         self.mappainter = QPainter(self.world_img)
@@ -71,8 +89,7 @@ class Window(QWidget, object):
         self.mappainter.setBrush(QColor(137, 207, 240, 255))
 
         #Hiermit werden später die Krater gezeichnet
-        #Maybe Problem: Panzer werden auch überzeichnet, aber man könnte ja die Panzer dann wieder darüber malen
-        #self.mappainter.drawEllipse(QPoint(50, 234), 50, 50)
+        #self.mappainter.drawEllipse(QPoint(60, 234), 50, 50)
 
         # timer
         self.timerFun()
@@ -93,19 +110,21 @@ class Window(QWidget, object):
         # Einen QPainter für das temporäre Bild erstellen
         temppainter = QPainter(self.temp_img)
 
-        # Den Panzer zeichnen
+        # Player Left zeichnen
         temppainter.setPen(QColor(137, 207, 240, 255))
         temppainter.setBrush(self.player_left.pLColor)
         temppainter.drawRect(self.player_left.pLX-20, self.player_left.pLY, 40, -25)
+
+        # Player Right zeichnen
+        temppainter.setPen(QColor(137, 207, 240, 255))
+        temppainter.setBrush(self.player_right.pLColor)
+        temppainter.drawRect(self.player_right.pLX - 20, self.player_right.pLY, 40, -25)
 
         # Das temporäre Bild auf das Anzeigelabel setzen
         self.display.setPixmap(QPixmap.fromImage(self.temp_img))
 
         self.time += 1
         print(self.time)
-
-
-
 
 
 
@@ -119,44 +138,54 @@ class Window(QWidget, object):
 
 
     def keyPressEvent(self, QKeyEvent):
-        if   QKeyEvent.key() == Qt.Key.Key_Right:
-            self.player_left.move("RIGHT")
-            self.fixY()
-        elif  QKeyEvent.key() == Qt.Key.Key_Left:
-            self.player_left.move("LEFT")
-            self.fixY()
+        if self.turn == "PL":
+            player = self.player_left
+        elif self.turn == "PR":
+            player = self.player_right
+        else:
+            pass
+
+        if  QKeyEvent.key() == Qt.Key.Key_Right:
+            player.move("RIGHT")
+            self.fixY(player)
+        elif QKeyEvent.key() == Qt.Key.Key_Left:
+            player.move("LEFT")
+            self.fixY(player)
+
+        #Nächste Runde wenn "Space"
+        elif QKeyEvent.key() == Qt.Key.Key_Space:
+            if self.turn == "PL":
+                self.player_right.fuel = 100
+                self.turn = "PR"
+            elif self.turn == "PR":
+                self.player_left.fuel = 100
+                self.turn = "PL"
 
 
-    def fixY(self):
+    # Hier wird später ein Problem enstehen, wenn man versucht zu steile Kanten noch oben zu fahren.
+    # Lösungen: Zählen wie oft man hoch geht. Wenn man z.B. mehr als 5 mal hoch muss, wieder zurück -> Geht nicht
+    # Kann sein das dafür diese gesamte Funktion ganz anderes geschrieben werden muss
+
+    # Panzer auf die richtige Höhe bringen
+    def fixY(self, player):
         fixed = False
-        if self.checkGround(self.player_left.pLX,self.player_left.pLY):   #Unterirdisch
+        if self.checkGround(player.pLX,player.pLY):   #Unterirdisch
             while fixed == False:
-                self.player_left.pLY -=1
-                if self.checkGround(self.player_left.pLX,self.player_left.pLY) == False:
-                    self.player_left.pLY += 1
+                player.pLY -=1
+                if self.checkGround(player.pLX,player.pLY) == False:
+                    player.pLY += 1
                     fixed = True
         else: #fliegt
             while fixed == False:
-                self.player_left.pLY +=1
-                if self.checkGround(self.player_left.pLX,self.player_left.pLY) == True:
+                player.pLY +=1
+                if self.checkGround(player.pLX,player.pLY) == True:
                     fixed = True
-
-
-
-
-
-
 
 
 
 
     def checkGround(self, x, y):
-        #Funktion um zu Überprüfen, ob ein Pixel Boden oder Himmel ist.
-        #ABER:
-        #Maybe Problem in der Zukunft: Wenn ein Panzer den Boden Überdeckt, wird der Boden nicht mehr erkannt (da die Farbe des Pixel abgefragt wird)
-        #Aber: juckt mich doch nicht, Viktor muss das mit den Panzern machen hehe
-        #Maybe muss man anderes Bild drüber legen oder so, KP ob QLabel das kann
-        #oder: if ... or color == Farbe Panzer
+        #Auffälligkeit: Wird ein Geschoss durch einen Panzer fliegen, wird das Geschoss trotzdem erst am Boden auftreffen
         pixel_value = self.world_img.pixel(x,y)
         color = QColor(pixel_value)
         if color == QColor(128, 128, 128, 255):
