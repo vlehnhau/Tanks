@@ -14,20 +14,20 @@ class Game():
 class Player:
     def __init__(self, color, x, y):
         self.pLColor = color
-        self.pLX = x
-        self.pLY = y
+        self.pX = x
+        self.pY = y
         self.fuel = 100
 
 
     def move(self, direction):
         if self.fuel != 0:
             if direction == "RIGHT":
-                if self.pLX != 1000-1:
-                    self.pLX += 1
+                if self.pX != 1000-1:
+                    self.pX += 1
                     self.fuel -= 1
             if direction == "LEFT":
-                if self.pLX != 1:
-                    self.pLX -= 1
+                if self.pX != 1:
+                    self.pX -= 1
                     self.fuel -= 1
 
 
@@ -73,8 +73,8 @@ class Window(QWidget, object):
 
         ### Player Left (grün)
         self.player_left = Player(QColor(0, 150, 0, 255),
-                                  100,
-                                  round(int((np.sin(2 * np.pi * 100 / 1000) * 0.5 + 1) * 400/2)))
+                                  110,
+                                  round(int((np.sin(2 * np.pi * 110 / 1000) * 0.5 + 1) * 400/2)))
 
         ### Player Right (red)
         self.player_right = Player(QColor(180, 0, 0, 255),
@@ -89,18 +89,10 @@ class Window(QWidget, object):
         self.mappainter.setBrush(QColor(137, 207, 240, 255))
 
         #Hiermit werden später die Krater gezeichnet
-        #self.mappainter.drawEllipse(QPoint(60, 234), 50, 50)
+        self.mappainter.drawEllipse(QPoint(60, 234), 50, 50)
 
         # timer
         self.timerFun()
-
-        #Nur zum Testen ob checkGround funktion
-        print(self.checkGround(10,10))      #False
-        print(self.checkGround(500, 399))   #True
-        print(self.checkGround(50,234))     #False
-        print(self.checkGround(10,234))     #False
-        print(self.checkGround(50, 285))    #True
-
         self.time = 0
 
     def onRepeat(self):
@@ -113,12 +105,12 @@ class Window(QWidget, object):
         # Player Left zeichnen
         temppainter.setPen(QColor(137, 207, 240, 255))
         temppainter.setBrush(self.player_left.pLColor)
-        temppainter.drawRect(self.player_left.pLX-20, self.player_left.pLY, 40, -25)
+        temppainter.drawRect(self.player_left.pX-20, self.player_left.pY, 40, -25)
 
         # Player Right zeichnen
         temppainter.setPen(QColor(137, 207, 240, 255))
         temppainter.setBrush(self.player_right.pLColor)
-        temppainter.drawRect(self.player_right.pLX - 20, self.player_right.pLY, 40, -25)
+        temppainter.drawRect(self.player_right.pX - 20, self.player_right.pY, 40, -25)
 
         # Das temporäre Bild auf das Anzeigelabel setzen
         self.display.setPixmap(QPixmap.fromImage(self.temp_img))
@@ -146,11 +138,13 @@ class Window(QWidget, object):
             pass
 
         if  QKeyEvent.key() == Qt.Key.Key_Right:
-            player.move("RIGHT")
-            self.fixY(player)
+            if self.checkIfMovePossible(player.pX+1, player.pY):
+                player.move("RIGHT")
+                self.fixY(player)
         elif QKeyEvent.key() == Qt.Key.Key_Left:
-            player.move("LEFT")
-            self.fixY(player)
+            if self.checkIfMovePossible(player.pX-1, player.pY):
+                player.move("LEFT")
+                self.fixY(player)
 
         #Nächste Runde wenn "Space"
         elif QKeyEvent.key() == Qt.Key.Key_Space:
@@ -162,23 +156,38 @@ class Window(QWidget, object):
                 self.turn = "PL"
 
 
-    # Hier wird später ein Problem enstehen, wenn man versucht zu steile Kanten noch oben zu fahren.
-    # Lösungen: Zählen wie oft man hoch geht. Wenn man z.B. mehr als 5 mal hoch muss, wieder zurück -> Geht nicht
-    # Kann sein das dafür diese gesamte Funktion ganz anderes geschrieben werden muss
+    #Dadurch kann man nichtmehr zu Steile Kanten hoch- oder runterfahren
+    def checkIfMovePossible(self,x,y):                #Man kann nicht hochfahren, wenn zu Nah über einen Boden ist
+        if (self.checkGround(x,y-25) == True):
+            return False
+        if (self.checkGround(x,y) == True):           #Man will hoch fahren
+            if (self.checkGround(x,y-4) == True):
+                return False
+            else:
+                return True
+
+        elif (self.checkGround(x,y) == False):        #Man will runter fahren
+            if (self.checkGround(x,y+4) == True):
+                return True
+            else:
+                return False
+
+
+
 
     # Panzer auf die richtige Höhe bringen
     def fixY(self, player):
         fixed = False
-        if self.checkGround(player.pLX,player.pLY):   #Unterirdisch
+        if self.checkGround(player.pX,player.pY):   #Unterirdisch
             while fixed == False:
-                player.pLY -=1
-                if self.checkGround(player.pLX,player.pLY) == False:
-                    player.pLY += 1
+                player.pY -=1
+                if self.checkGround(player.pX,player.pY) == False:
+                    player.pY += 1
                     fixed = True
         else: #fliegt
             while fixed == False:
-                player.pLY +=1
-                if self.checkGround(player.pLX,player.pLY) == True:
+                player.pY +=1
+                if self.checkGround(player.pX,player.pY) == True:
                     fixed = True
 
 
