@@ -117,7 +117,19 @@ class Window(QWidget, object):
         self.timerFun()
         self.time = 0
 
+        self.spacepressed = False
+
     def onRepeat(self):
+        #Power berechnen
+        if self.spacepressed == True:
+            if self.turn == "PL":
+                if self.player_left.power != 100:
+                    self.player_left.power += 1
+            if self.turn == "PR":
+                if self.player_right.power != 100:
+                    self.player_right.power += 1
+
+
         # temporäres Bild (Kopie von world_img)
         self.temp_img = QImage(self.world_img)
 
@@ -128,7 +140,6 @@ class Window(QWidget, object):
         temppainter.setPen(Qt.black)
         temppainter.setBrush(self.player_left.pLColor)
         temppainter.drawRect(self.player_left.pX-20, self.player_left.pY, 40, -25)
-
 
         ### Rohr zeichen (Player Left)
         # Um diesen Punkt rotiert sich das Rohr
@@ -248,7 +259,7 @@ class Window(QWidget, object):
         # timer
         self.timer = QTimer()
         self.timer.setSingleShot(False)
-        self.timer.setInterval(50)  # in milliseconds and controls the speed
+        self.timer.setInterval(20)  # in milliseconds and controls the speed
         self.timer.timeout.connect(self.onRepeat)
         self.timer.start()
 
@@ -280,12 +291,18 @@ class Window(QWidget, object):
 
         # Nächste Runde wenn "Space" (später schießen)
         elif QKeyEvent.key() == Qt.Key.Key_Space:
-            if self.turn == "PL":
-                self.player_right.fuel = 100
-                self.turn = "PR"
-            elif self.turn == "PR":
-                self.player_left.fuel = 100
-                self.turn = "PL"
+            if self.spacepressed == True:
+                if self.turn == "PL":
+                    self.player_right.fuel = 100
+                    self.player_right.power = 0
+                    self.turn = "PR"
+                elif self.turn == "PR":
+                    self.player_left.fuel = 100
+                    self.player_left.power = 0
+                    self.turn = "PL"
+                self.spacepressed = False
+            else:
+                self.spacepressed = True
 
 
     # Dadurch kann man nichtmehr zu Steile Kanten hoch- oder runterfahren
