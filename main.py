@@ -19,6 +19,7 @@ class Player:
         self.fuel = 100
         self.angle = ang
         self.health = 1000
+        self.power = 0
 
     # Bewegung des Spielers. Man kann nicht über den Rand hinaus fahren
     def move(self, direction):
@@ -128,6 +129,7 @@ class Window(QWidget, object):
         temppainter.setBrush(self.player_left.pLColor)
         temppainter.drawRect(self.player_left.pX-20, self.player_left.pY, 40, -25)
 
+
         ### Rohr zeichen (Player Left)
         # Um diesen Punkt rotiert sich das Rohr
         fixed_x, fixed_y = self.player_left.pX , self.player_left.pY -12.5
@@ -149,6 +151,7 @@ class Window(QWidget, object):
         temppainter.resetTransform()
 
 
+
         # Player Right zeichnen
         temppainter.setBrush(self.player_right.pLColor)
         temppainter.drawRect(self.player_right.pX - 20, self.player_right.pY, 40, -25)
@@ -156,16 +159,13 @@ class Window(QWidget, object):
         ### Rohr zeichen (Player Right)
         # Um diesen Punkt rotiert sich das Rohr
         fixed_x, fixed_y = self.player_right.pX, self.player_right.pY - 12.5
-
         temppainter.setBrush(QColor(120, 0, 0, 255))
-
         # Rotation
         transform = QTransform()
         transform.translate(fixed_x, fixed_y)
         temppainter.setTransform(transform)
         transform.rotate(self.player_right.angle)
         temppainter.setTransform(transform)
-
         # Rohr
         temppainter.drawRect(0, -2, 30, 5)
         # kleiner Zipfel am Rohr
@@ -179,12 +179,10 @@ class Window(QWidget, object):
         temppainter.drawRect(5,5,202,12)
         temppainter.setBrush(self.player_left.pLColor)
         temppainter.drawRect(6, 6, round(self.player_left.health/5), 10)
-
         # Healthbar (Player Right)
         temppainter.setBrush(Qt.black)
         temppainter.drawRect(793,5,202,12)
         temppainter.setBrush(self.player_right.pLColor)
-
         # Healthbar muss um 180° Rotiert werden
         fixed_x, fixed_y = (994, 6)
         transform = QTransform()
@@ -195,15 +193,48 @@ class Window(QWidget, object):
         temppainter.drawRect(0, -10, round(self.player_right.health/5), 10)
         temppainter.resetTransform()
 
+        # Power Bar (Player Left)
+        temppainter.setBrush(Qt.black)
+        temppainter.drawRect(5, 20, 152, 12)
+        temppainter.setBrush(Qt.blue)
+        temppainter.drawRect(6, 21, round(self.player_left.power * 1.5), 10)
+         # Power Bar (Player Right)
+        temppainter.setBrush(Qt.black)
+        temppainter.drawRect(843, 21, 152, 12)
+        fixed_x, fixed_y = (994,21)
+        transform = QTransform()
+        transform.translate(fixed_x, fixed_y)
+        temppainter.setTransform(transform)
+        transform.rotate(180)
+        temppainter.setTransform(transform)
+        temppainter.setBrush(Qt.blue)
+        temppainter.drawRect(0, -11, round(self.player_right.power * 1.5), 10)
+        temppainter.resetTransform()
+
+
+        # Fuel Bar (Player Left)
+        temppainter.setBrush(Qt.black)
+        temppainter.drawRect(5, 35, 102, 12)
+        temppainter.setBrush(Qt.darkYellow)
+        temppainter.drawRect(6, 36, round(self.player_left.fuel * 1), 10)
+        # Fuel Bar (Player Right)
+        temppainter.setBrush(Qt.black)
+        temppainter.drawRect(893, 36, 102, 12)
+        fixed_x, fixed_y = (994, 36)
+        transform = QTransform()
+        transform.translate(fixed_x, fixed_y)
+        temppainter.setTransform(transform)
+        transform.rotate(180)
+        temppainter.setTransform(transform)
+        temppainter.setBrush(Qt.darkYellow)
+        temppainter.drawRect(0, -11, round(self.player_right.fuel * 1), 10)
+
+
 
 
 
         # temp zeichnen
         self.display.setPixmap(QPixmap.fromImage(self.temp_img))
-
-        # testen ob Timer läuft (Später löschen)
-        self.time += 1
-        print(self.time)
 
         # Statusleiste
         if self.turn == "PL":
@@ -217,7 +248,7 @@ class Window(QWidget, object):
         # timer
         self.timer = QTimer()
         self.timer.setSingleShot(False)
-        self.timer.setInterval(100)  # in milliseconds and controls the speed
+        self.timer.setInterval(50)  # in milliseconds and controls the speed
         self.timer.timeout.connect(self.onRepeat)
         self.timer.start()
 
