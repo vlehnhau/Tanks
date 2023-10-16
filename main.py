@@ -22,11 +22,11 @@ class Player:
     def move(self, direction):
         if self.fuel != 0:
             if direction == "RIGHT":
-                if self.pX != 1000-1:
+                if self.pX != 1000-21:
                     self.pX += 1
                     self.fuel -= 1
             if direction == "LEFT":
-                if self.pX != 1:
+                if self.pX != 21:
                     self.pX -= 1
                     self.fuel -= 1
 
