@@ -295,15 +295,13 @@ class Window(QWidget, object):
 
     def calcDMG(self):
         # Schaden von Player Left
-        diff = self.player_left.pX - self.current_shoot.sX + self.player_left.pY - 15 - self.current_shoot.sY
-        if diff < 0: diff = -1 * diff
+        diff = round(math.sqrt((self.current_shoot.sX - self.player_left.pX)**2 + (self.current_shoot.sY - (self.player_left.pY - 15))**2))
         # Radius des Schusses: 25 | Breite des Panzers/2 = 20 | Treffer bei Diff < 45
         if diff < 45:
             self.player_left.health -= 100 + (45-diff) * 5
 
         # Schaden von Player Right
-        diff = self.player_right.pX - self.current_shoot.sX + self.player_right.pY - 15 - self.current_shoot.sY
-        if diff < 0: diff = -1 * diff
+        diff = round(math.sqrt((self.current_shoot.sX - self.player_right.pX)**2 + (self.current_shoot.sY - (self.player_right.pY - 15))**2))
         # Radius des Schusses: 25 | Breite des Panzers/2 = 20 | Treffer bei Diff < 45
         if diff < 45:
             self.player_right.health -= 100 + (45-diff) * 5
@@ -411,28 +409,6 @@ class Window(QWidget, object):
         # Transformation wieder zurück setzten
         temppainter.resetTransform()
 
-
-        # Healthbar (Player Left)
-        temppainter.setBrush(Qt.black)
-        temppainter.drawRect(5,5,202,12)
-        temppainter.setBrush(self.player_left.pLColor)
-        if self.player_left.health > 0:
-            temppainter.drawRect(6, 6, round(self.player_left.health/5), 10)
-        # Healthbar (Player Right)
-        temppainter.setBrush(Qt.black)
-        temppainter.drawRect(793,5,202,12)
-        temppainter.setBrush(self.player_right.pLColor)
-        # Healthbar muss um 180° Rotiert werden
-        fixed_x, fixed_y = (994, 6)
-        transform = QTransform()
-        transform.translate(fixed_x, fixed_y)
-        temppainter.setTransform(transform)
-        transform.rotate(180)
-        temppainter.setTransform(transform)
-        if self.player_right.health > 0:
-            temppainter.drawRect(0, -10, round(self.player_right.health/5), 10)
-        temppainter.resetTransform()
-
         # Power Bar (Player Left)
         temppainter.setBrush(Qt.black)
         temppainter.drawRect(5, 20, 152, 12)
@@ -468,6 +444,35 @@ class Window(QWidget, object):
         temppainter.setTransform(transform)
         temppainter.setBrush(Qt.darkYellow)
         temppainter.drawRect(0, -11, round(self.player_right.fuel * 1), 10)
+        temppainter.resetTransform()
+
+        # Healthbar (Player Left)
+        temppainter.setBrush(Qt.black)
+        temppainter.drawRect(5, 5, 202, 12)
+        temppainter.setBrush(self.player_left.pLColor)
+        if self.player_left.health > 0:
+            temppainter.drawRect(6, 6, round(self.player_left.health / 5), 10)
+        else:  # Rot hat gewonnen
+            print("Rot hat gewonnen")
+            self.timer.stop()
+
+        # Healthbar (Player Right)
+        temppainter.setBrush(Qt.black)
+        temppainter.drawRect(793, 5, 202, 12)
+        temppainter.setBrush(self.player_right.pLColor)
+        # Healthbar muss um 180° Rotiert werden
+        fixed_x, fixed_y = (994, 6)
+        transform = QTransform()
+        transform.translate(fixed_x, fixed_y)
+        temppainter.setTransform(transform)
+        transform.rotate(180)
+        temppainter.setTransform(transform)
+        if self.player_right.health > 0:
+            temppainter.drawRect(0, -10, round(self.player_right.health / 5), 10)
+        else:   # Grün hat gewonnen
+            print("Grün hat gewonnen")
+            self.timer.stop()
+
         temppainter.resetTransform()
 
         # temp zeichnen
