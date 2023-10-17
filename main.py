@@ -311,11 +311,15 @@ class Window(QWidget, object):
         # Power erhöhen, wenn Space gedrückt wurde
         if self.spacepressed == True:
             if self.turn == "PL":
-                if self.player_left.power != 100:
+                if self.player_left.power != 60:
                     self.player_left.power += 1
+                else:
+                    self.player_left.power = 0
             if self.turn == "PR":
-                if self.player_right.power != 100:
+                if self.player_right.power != 60:
                     self.player_right.power += 1
+                else:
+                    self.player_right.power = 0
 
         if self.current_shoot.flies == True:
             self.moveShot()
@@ -406,7 +410,7 @@ class Window(QWidget, object):
         temppainter.setBrush(Qt.black)
         temppainter.drawRect(5, 20, 152, 12)
         temppainter.setBrush(Qt.blue)
-        temppainter.drawRect(6, 21, round(self.player_left.power * 1.5), 10)
+        temppainter.drawRect(6, 21, round(self.player_left.power * 2.5), 10)
          # Power Bar (Player Right)
         temppainter.setBrush(Qt.black)
         temppainter.drawRect(843, 21, 152, 12)
@@ -417,7 +421,7 @@ class Window(QWidget, object):
         transform.rotate(180)
         temppainter.setTransform(transform)
         temppainter.setBrush(Qt.blue)
-        temppainter.drawRect(0, -11, round(self.player_right.power * 1.5), 10)
+        temppainter.drawRect(0, -11, round(self.player_right.power * 2.5), 10)
         temppainter.resetTransform()
 
 
