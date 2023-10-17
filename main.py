@@ -40,6 +40,13 @@ class Player:
         if direction == "LEFT":
             self.angle -= 1
 
+class Shot:
+    def __init__(self):
+        self.sX = 0
+        self.sY = 0
+        self.shot_angle = 0
+        self.shot_power = 0
+        self.flies = False
 
 
 
@@ -93,6 +100,9 @@ class Window(QWidget, object):
                                   round(int((np.sin(2 * np.pi * 900 / 1000) * 0.5 + 1) * 400 / 2)),
                                   -135)
 
+        ### Schuss (Wir benutzen immer wieder den selben Schuss)
+        self.currentshoot = Shot
+
 
 
         self.mappainter = QPainter(self.world_img)
@@ -119,8 +129,123 @@ class Window(QWidget, object):
 
         self.spacepressed = False
 
+    def timerFun(self):
+        # timer
+        self.timer = QTimer()
+        self.timer.setSingleShot(False)
+        self.timer.setInterval(20)  # in milliseconds and controls the speed
+        self.timer.timeout.connect(self.onRepeat)
+        self.timer.start()
+
+
+    def keyPressEvent(self, QKeyEvent):
+        if self.turn == "PL":
+            player = self.player_left
+        elif self.turn == "PR":
+            player = self.player_right
+        else:
+            pass
+
+        # Spieler bewegen falls möglich
+        if  QKeyEvent.key() == Qt.Key.Key_Right:
+            if self.checkIfMovePossible(player.pX+1, player.pY):
+                player.move("RIGHT")
+                self.fixY(player)
+        elif QKeyEvent.key() == Qt.Key.Key_Left:
+            if self.checkIfMovePossible(player.pX-1, player.pY):
+                player.move("LEFT")
+                self.fixY(player)
+
+        # angle ändern (Taste UP = Rechts, Taste Down = Links (Wie Blinker))
+        elif QKeyEvent.key() == Qt.Key_Up:
+            player.changeAngle("RIGHT")
+        elif QKeyEvent.key() == Qt.Key_Down:
+            player.changeAngle("LEFT")
+
+
+        # Nächste Runde wenn "Space" (später schießen)
+        elif QKeyEvent.key() == Qt.Key.Key_Space:
+            if self.spacepressed == True:
+                if self.turn == "PL":
+
+                    # Der Spieler schießt
+                    self.shoot(self.player_left)
+
+                    self.player_right.fuel = 100
+                    self.player_right.power = 0
+                    self.turn = "PR"
+                elif self.turn == "PR":
+                    self.shoot(self.player_right)
+
+                    self.player_left.fuel = 100
+                    self.player_left.power = 0
+                    self.turn = "PL"
+                self.spacepressed = False
+            else:
+                self.spacepressed = True
+
+
+    # Dadurch kann man nichtmehr zu Steile Kanten hoch- oder runterfahren
+    def checkIfMovePossible(self,x,y):                #Man kann nicht hochfahren, wenn zu Nah über einen Boden ist
+        if (self.checkGround(x,y-25) == True):
+            return False
+        if (self.checkGround(x,y) == True):           #Man will hoch fahren
+            if (self.checkGround(x,y-4) == True):
+                return False
+            else:
+                return True
+
+        elif (self.checkGround(x,y) == False):        #Man will runter fahren
+            if (self.checkGround(x,y+4) == True):
+                return True
+            else:
+                return False
+
+
+    def shoot(self, player):
+        if player == self.player_left:
+            print("PL hat geschossen")
+        else:
+            print("PR hat geschossen")
+        self.currentshoot.sX, self.currentshoot.sY = player.pX, player.pX
+        self.currentshoot.shot_angle = player.angle
+        self.currentshoot.shot_power = player.power
+
+
+
+
+
+    # Panzer auf die richtige Höhe bringen
+    def fixY(self, player):
+        fixed = False
+        if self.checkGround(player.pX,player.pY):   # Unterirdisch
+            while fixed == False:
+                player.pY -=1
+                if self.checkGround(player.pX,player.pY) == False:
+                    player.pY += 1
+                    fixed = True
+        else: # fliegt
+            while fixed == False:
+                player.pY +=1
+                if self.checkGround(player.pX,player.pY) == True:
+                    fixed = True
+
+
+
+
+    def checkGround(self, x, y):
+        # Auffälligkeit: Wird ein Geschoss durch einen Panzer fliegen, wird das Geschoss trotzdem erst am Boden auftreffen
+        # Aber ist ein Feature, kein Bug
+        pixel_value = self.world_img.pixel(x,y)
+        color = QColor(pixel_value)
+        if color == QColor(128, 128, 128, 255):
+            return True
+        else:
+            return False
+
+
     def onRepeat(self):
-        #Power berechnen
+        # Power erhöhen, wenn Space gedrückt wurde
         if self.spacepressed == True:
             if self.turn == "PL":
                 if self.player_left.power != 100:
@@ -252,105 +377,6 @@ class Window(QWidget, object):
             self.displayState.setText("Grün ist dran. Tank: " + str(self.player_left.fuel))
         elif self.turn == "PR":
             self.displayState.setText("Rot ist dran. Tank: " + str(self.player_right.fuel))
-
-
-
-    def timerFun(self):
-        # timer
-        self.timer = QTimer()
-        self.timer.setSingleShot(False)
-        self.timer.setInterval(20)  # in milliseconds and controls the speed
-        self.timer.timeout.connect(self.onRepeat)
-        self.timer.start()
-
-
-    def keyPressEvent(self, QKeyEvent):
-        if self.turn == "PL":
-            player = self.player_left
-        elif self.turn == "PR":
-            player = self.player_right
-        else:
-            pass
-
-        # Spieler bewegen falls möglich
-        if  QKeyEvent.key() == Qt.Key.Key_Right:
-            if self.checkIfMovePossible(player.pX+1, player.pY):
-                player.move("RIGHT")
-                self.fixY(player)
-        elif QKeyEvent.key() == Qt.Key.Key_Left:
-            if self.checkIfMovePossible(player.pX-1, player.pY):
-                player.move("LEFT")
-                self.fixY(player)
-
-        # angle ändern (Taste UP = Rechts, Taste Down = Links (Wie Blinker))
-        elif QKeyEvent.key() == Qt.Key_Up:
-            player.changeAngle("RIGHT")
-        elif QKeyEvent.key() == Qt.Key_Down:
-            player.changeAngle("LEFT")
-
-
-        # Nächste Runde wenn "Space" (später schießen)
-        elif QKeyEvent.key() == Qt.Key.Key_Space:
-            if self.spacepressed == True:
-                if self.turn == "PL":
-                    self.player_right.fuel = 100
-                    self.player_right.power = 0
-                    self.turn = "PR"
-                elif self.turn == "PR":
-                    self.player_left.fuel = 100
-                    self.player_left.power = 0
-                    self.turn = "PL"
-                self.spacepressed = False
-            else:
-                self.spacepressed = True
-
-
-    # Dadurch kann man nichtmehr zu Steile Kanten hoch- oder runterfahren
-    def checkIfMovePossible(self,x,y):                #Man kann nicht hochfahren, wenn zu Nah über einen Boden ist
-        if (self.checkGround(x,y-25) == True):
-            return False
-        if (self.checkGround(x,y) == True):           #Man will hoch fahren
-            if (self.checkGround(x,y-4) == True):
-                return False
-            else:
-                return True
-
-        elif (self.checkGround(x,y) == False):        #Man will runter fahren
-            if (self.checkGround(x,y+4) == True):
-                return True
-            else:
-                return False
-
-
-
-
-    # Panzer auf die richtige Höhe bringen
-    def fixY(self, player):
-        fixed = False
-        if self.checkGround(player.pX,player.pY):   # Unterirdisch
-            while fixed == False:
-                player.pY -=1
-                if self.checkGround(player.pX,player.pY) == False:
-                    player.pY += 1
-                    fixed = True
-        else: # fliegt
-            while fixed == False:
-                player.pY +=1
-                if self.checkGround(player.pX,player.pY) == True:
-                    fixed = True
-
-
-
-
-    def checkGround(self, x, y):
-        # Auffälligkeit: Wird ein Geschoss durch einen Panzer fliegen, wird das Geschoss trotzdem erst am Boden auftreffen
-        # Aber ist ein Feature, kein Bug
-        pixel_value = self.world_img.pixel(x,y)
-        color = QColor(pixel_value)
-        if color == QColor(128, 128, 128, 255):
-            return True
-        else:
-            return False
 
 
 
