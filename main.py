@@ -272,6 +272,12 @@ class Window(QWidget, object):
     def shotHitGround(self):
         print("Treffer")
         self.mappainter.drawEllipse(self.current_shoot.sX-25,self.current_shoot.sY-35, 50, 50)
+        self.fixY(self.player_left)
+        self.fixY(self.player_right)
+
+        #Schaden berechnen:
+        self.calcDMG()
+
         if self.turn == "PL":
             self.player_right.fuel = 100
             self.player_right.power = 0
@@ -287,6 +293,25 @@ class Window(QWidget, object):
             self.turn = "PL"
 
 
+    def calcDMG(self):
+        # Schaden von Player Left
+        diff = self.player_left.pX - self.current_shoot.sX + self.player_left.pY - 15 - self.current_shoot.sY
+        if diff < 0: diff = -1 * diff
+        # Radius des Schusses: 25 | Breite des Panzers/2 = 20 | Treffer bei Diff < 45
+        if diff < 45:
+            self.player_left.health -= 100 + (45-diff) * 5
+
+        # Schaden von Player Right
+        diff = self.player_right.pX - self.current_shoot.sX + self.player_right.pY - 15 - self.current_shoot.sY
+        if diff < 0: diff = -1 * diff
+        # Radius des Schusses: 25 | Breite des Panzers/2 = 20 | Treffer bei Diff < 45
+        if diff < 45:
+            self.player_right.health -= 100 + (45-diff) * 5
+
+
+
+
+
 
 
 
@@ -295,14 +320,14 @@ class Window(QWidget, object):
             self.player_right.fuel = 100
             self.player_right.power = 0
             self.time = 0
-            self.current_shoot.sX, self.current_shoot.sY = self.player_right.pX - 2, self.player_right.pY - 15
+            self.current_shoot.sX, self.current_shoot.sY = 500,2000
             self.turn = "PR"
 
         elif self.turn == "PR":
             self.player_left.fuel = 100
             self.player_left.power = 0
             self.time = 0
-            self.current_shoot.sX, self.current_shoot.sY = self.player_left.pX - 2, self.player_left.pY - 15
+            self.current_shoot.sX, self.current_shoot.sY = 500,2000
             self.turn = "PL"
 
 
@@ -391,7 +416,8 @@ class Window(QWidget, object):
         temppainter.setBrush(Qt.black)
         temppainter.drawRect(5,5,202,12)
         temppainter.setBrush(self.player_left.pLColor)
-        temppainter.drawRect(6, 6, round(self.player_left.health/5), 10)
+        if self.player_left.health > 0:
+            temppainter.drawRect(6, 6, round(self.player_left.health/5), 10)
         # Healthbar (Player Right)
         temppainter.setBrush(Qt.black)
         temppainter.drawRect(793,5,202,12)
@@ -403,7 +429,8 @@ class Window(QWidget, object):
         temppainter.setTransform(transform)
         transform.rotate(180)
         temppainter.setTransform(transform)
-        temppainter.drawRect(0, -10, round(self.player_right.health/5), 10)
+        if self.player_right.health > 0:
+            temppainter.drawRect(0, -10, round(self.player_right.health/5), 10)
         temppainter.resetTransform()
 
         # Power Bar (Player Left)
@@ -443,8 +470,6 @@ class Window(QWidget, object):
         temppainter.drawRect(0, -11, round(self.player_right.fuel * 1), 10)
         temppainter.resetTransform()
 
-
-
         # temp zeichnen
         self.display.setPixmap(QPixmap.fromImage(self.temp_img))
 
@@ -460,8 +485,6 @@ app.exec()
 
 
 ## Next Steps:
-# Krater sind verbuggt. Können unter der Erde sein (Bisher KP wie fix)
-# Schaden (easy)
 # Anzeige wer an der Reihe ist
 #
 #
