@@ -60,13 +60,13 @@ class Window(QWidget, object):
         self.timer = QTimer()
 
         # window settings
-        self.setGeometry(450, 250, 1000, 450)
+        self.setGeometry(450, 250, 1000, 600)
         self.setWindowTitle("Game")
 
         self.form = QFormLayout()  # Layout
 
         # create board
-        self.board = QtGui.QPixmap(1000, 400)
+        self.board = QtGui.QPixmap(1000, 600)
 
 
         self.display = QLabel()
@@ -82,7 +82,7 @@ class Window(QWidget, object):
 
         # world
         self.world = standardMap.worldData()
-        self.world_img = QImage(self.world.data, 1000, 400, QImage.Format_RGBA8888)
+        self.world_img = QImage(self.world.data, 1000, 600, QImage.Format_RGBA8888)
 
         ### Runden
         self.turn = "PL" #Links darf anfangen
@@ -91,13 +91,13 @@ class Window(QWidget, object):
         ### Player Left (grün)
         self.player_left = Player(QColor(0, 150, 0, 255),
                                   100,
-                                  round(int((np.sin(2 * np.pi * 100 / 1000) * 0.5 + 1) * 400/2)),
+                                  round(int((np.sin(2 * np.pi * 100 / 1000) * 0.3 + 1) * 600/2)+75),
                                   -45)
 
         ### Player Right (red)
         self.player_right = Player(QColor(200, 0, 0, 255),
                                   900,
-                                  round(int((np.sin(2 * np.pi * 900 / 1000) * 0.5 + 1) * 400 / 2)),
+                                  round(int((np.sin(2 * np.pi * 900 / 1000) * 0.3 + 1) * 600/2)+75),
                                   -135)
 
         ### Schuss (Wir benutzen immer wieder den selben Schuss)
@@ -113,15 +113,6 @@ class Window(QWidget, object):
         #Hiermit werden später die Krater gezeichnet
         #self.mappainter.drawEllipse(QPoint(60, 234), 50, 50)
 
-
-        # Statusleiste unten
-        self.statusbar = QStatusBar()
-        self.statusbar.setObjectName("statusbar")
-        self.displayState = QLabel("Grün ist dran. Fuel: 100")
-        self.statusbar.addWidget(self.displayState)
-        # self.statusbar.move(17, 420)
-        self.form.addWidget(self.statusbar)
-        self.form.addWidget(self.statusbar)
 
         # timer
         self.timerFun()
@@ -371,13 +362,6 @@ class Window(QWidget, object):
 
         # temp zeichnen
         self.display.setPixmap(QPixmap.fromImage(self.temp_img))
-
-        # Statusleiste
-        if self.turn == "PL":
-            self.displayState.setText("Grün ist dran. Tank: " + str(self.player_left.fuel))
-        elif self.turn == "PR":
-            self.displayState.setText("Rot ist dran. Tank: " + str(self.player_right.fuel))
-
 
 
 
