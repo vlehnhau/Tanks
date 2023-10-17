@@ -1,4 +1,5 @@
 import random
+import math
 import sys
 import numpy as np
 from PyQt5 import QtGui
@@ -42,8 +43,8 @@ class Player:
 
 class Shot:
     def __init__(self):
-        self.sX = 0
-        self.sY = 0
+        self.sX = 500       #Schuss startet irgendwo wo man ihn nicht sieht
+        self.sY = 2000
         self.shot_angle = 0
         self.shot_power = 0
         self.flies = False
@@ -100,8 +101,9 @@ class Window(QWidget, object):
                                   round(int((np.sin(2 * np.pi * 900 / 1000) * 0.3 + 1) * 600/2)+75),
                                   -135)
 
+
         ### Schuss (Wir benutzen immer wieder den selben Schuss)
-        self.currentshoot = Shot
+        self.current_shoot = Shot()
 
 
 
@@ -111,7 +113,7 @@ class Window(QWidget, object):
         self.mappainter.setBrush(QColor(137, 207, 240, 255))
 
         #Hiermit werden später die Krater gezeichnet
-        #self.mappainter.drawEllipse(QPoint(60, 234), 50, 50)
+        #self.mappainter.drawEllipse(QPoint(60, 434), 50, 50)
 
 
         # timer
@@ -156,41 +158,42 @@ class Window(QWidget, object):
 
         # Nächste Runde wenn "Space" (später schießen)
         elif QKeyEvent.key() == Qt.Key.Key_Space:
-            if self.spacepressed == True:
+            if self.spacepressed == True and self.current_shoot.flies == False:
                 if self.turn == "PL":
 
                     # Der Spieler schießt
                     self.shoot(self.player_left)
 
-                    self.player_right.fuel = 100
-                    self.player_right.power = 0
-                    self.turn = "PR"
+                    # self.player_right.fuel = 100
+                    # self.player_right.power = 0
+                    # self.turn = "PR"
                 elif self.turn == "PR":
                     self.shoot(self.player_right)
 
-                    self.player_left.fuel = 100
-                    self.player_left.power = 0
-                    self.turn = "PL"
+                    # self.player_left.fuel = 100
+                    # self.player_left.power = 0
+                    # self.turn = "PL"
                 self.spacepressed = False
-            else:
+            elif self.current_shoot.flies == False:
                 self.spacepressed = True
 
 
     # Dadurch kann man nichtmehr zu Steile Kanten hoch- oder runterfahren
     def checkIfMovePossible(self,x,y):                #Man kann nicht hochfahren, wenn zu Nah über einen Boden ist
-        if (self.checkGround(x,y-25) == True):
-            return False
-        if (self.checkGround(x,y) == True):           #Man will hoch fahren
-            if (self.checkGround(x,y-4) == True):
+        if self.current_shoot.flies == False:         #Man kann nicht fahren, wenn man schon geschossen hat
+            if (self.checkGround(x,y-25) == True):
                 return False
-            else:
-                return True
+            if (self.checkGround(x,y) == True):           #Man will hoch fahren
+                if (self.checkGround(x,y-4) == True):
+                    return False
+                else:
+                    return True
 
-        elif (self.checkGround(x,y) == False):        #Man will runter fahren
-            if (self.checkGround(x,y+4) == True):
-                return True
-            else:
-                return False
+            elif (self.checkGround(x,y) == False):        #Man will runter fahren
+                if (self.checkGround(x,y+4) == True):
+                    return True
+                else:
+                    return False
 
 
     def shoot(self, player):
@@ -198,9 +201,10 @@ class Window(QWidget, object):
             print("PL hat geschossen")
         else:
             print("PR hat geschossen")
-        self.currentshoot.sX, self.currentshoot.sY = player.pX, player.pX
-        self.currentshoot.shot_angle = player.angle
-        self.currentshoot.shot_power = player.power
+        self.current_shoot.sX, self.current_shoot.sY = player.pX-2, player.pY-15 #Von hier aus fängt der schuss an zu fliegen
+        self.current_shoot.shot_angle = player.angle
+        self.current_shoot.shot_power = player.power
+        self.current_shoot.flies = True
 
 
 
@@ -235,6 +239,74 @@ class Window(QWidget, object):
             return False
 
 
+    def moveShot(self):
+        # Gravitational constant (in pixel per frame squared)
+        # Gravitational constant (in pixel per frame squared)
+        g = 0.01
+
+        if self.current_shoot.flies:
+            # Berechne die horizontale Komponente der Schusskraft
+            horizontal_force = (self.current_shoot.shot_power/4) * math.cos(
+                math.radians(- self.current_shoot.shot_angle))
+
+            # Berechne die vertikale Komponente der Schusskraft
+            vertical_force = (self.current_shoot.shot_power/4) * math.sin(math.radians(- self.current_shoot.shot_angle))
+
+            # Aktualisiere die vertikale Position (y) unter Berücksichtigung der Schwerkraft
+            self.current_shoot.sY -= round(vertical_force - 0.5 * g * (self.time ** 2)/2)
+
+            # Aktualisiere die horizontale Position (x) unter Verwendung der horizontalen Schusskraft
+            self.current_shoot.sX += round(horizontal_force)
+
+            # Aktualisiere die Zeit (für die parabolische Bewegung)
+            self.time += 1
+
+            if self.checkGround(self.current_shoot.sX, self.current_shoot.sY):
+                self.current_shoot.flies = False
+                self.shotHitGround()
+            elif self.current_shoot.sX <= 0 or self.current_shoot.sX >= 1000:
+                self.current_shoot.flies = False
+                self.shootOutOfWorld()
+
+
+    def shotHitGround(self):
+        print("Treffer")
+        self.mappainter.drawEllipse(self.current_shoot.sX-25,self.current_shoot.sY-35, 50, 50)
+        if self.turn == "PL":
+            self.player_right.fuel = 100
+            self.player_right.power = 0
+            self.time = 0
+            self.current_shoot.sX, self.current_shoot.sY = 500,2000
+            self.turn = "PR"
+
+        elif self.turn == "PR":
+            self.player_left.fuel = 100
+            self.player_left.power = 0
+            self.time = 0
+            self.current_shoot.sX, self.current_shoot.sY = 500,2000
+            self.turn = "PL"
+
+
+
+
+
+    def shootOutOfWorld(self):
+        if self.turn == "PL":
+            self.player_right.fuel = 100
+            self.player_right.power = 0
+            self.time = 0
+            self.current_shoot.sX, self.current_shoot.sY = self.player_right.pX - 2, self.player_right.pY - 15
+            self.turn = "PR"
+
+        elif self.turn == "PR":
+            self.player_left.fuel = 100
+            self.player_left.power = 0
+            self.time = 0
+            self.current_shoot.sX, self.current_shoot.sY = self.player_left.pX - 2, self.player_left.pY - 15
+            self.turn = "PL"
+
+
+
     def onRepeat(self):
         # Power erhöhen, wenn Space gedrückt wurde
         if self.spacepressed == True:
@@ -245,12 +317,22 @@ class Window(QWidget, object):
                 if self.player_right.power != 100:
                     self.player_right.power += 1
 
+        if self.current_shoot.flies == True:
+            self.moveShot()
+
+
+
 
         # temporäres Bild (Kopie von world_img)
         self.temp_img = QImage(self.world_img)
 
         # Painter für temp
         temppainter = QPainter(self.temp_img)
+
+        # Schuss
+        temppainter.setBrush(Qt.black)
+        temppainter.drawEllipse(self.current_shoot.sX, self.current_shoot.sY, 5, 5)
+
 
         # Player Left zeichnen
         temppainter.setPen(Qt.black)
@@ -355,8 +437,7 @@ class Window(QWidget, object):
         temppainter.setTransform(transform)
         temppainter.setBrush(Qt.darkYellow)
         temppainter.drawRect(0, -11, round(self.player_right.fuel * 1), 10)
-
-
+        temppainter.resetTransform()
 
 
 
@@ -371,3 +452,20 @@ win = Window()
 win.show()
 
 app.exec()
+
+
+
+## Next Steps:
+# Krater sind verbuggt. Können unter der Erde sein (Bisher KP wie fix)
+# Schaden (easy)
+# Anzeige wer an der Reihe ist
+#
+#
+#
+## Später:
+# KI-Gegner (+ Startbildschirm zum entscheiden Spieler vs Spieler || Spieler vs Bot
+# Wind
+# Partikeleffekte der Explosion
+# Panzer schräg fahren
+# Random Map
+# Fluktuationen im Wind
