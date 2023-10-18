@@ -271,7 +271,7 @@ class Window(QWidget, object):
 
     def shotHitGround(self):
         print("Treffer")
-        self.mappainter.drawEllipse(self.current_shoot.sX-25,self.current_shoot.sY-35, 50, 50)
+        self.mappainter.drawEllipse(self.current_shoot.sX-25,self.current_shoot.sY-40, 50, 50)
         self.fixY(self.player_left)
         self.fixY(self.player_right)
 
