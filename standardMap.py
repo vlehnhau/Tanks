@@ -1,6 +1,6 @@
 import numpy as np
-from PyQt6.QtGui import QImage, QPixmap
-from PyQt6.QtWidgets import QLabel, QApplication
+from PyQt5.QtGui import QImage, QPixmap
+from PyQt5.QtWidgets import QLabel, QApplication
 import sys
 
 # Größe der Fläche
