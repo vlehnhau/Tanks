@@ -384,15 +384,21 @@ class Window(QWidget, object):
         temppainter = QPainter(self.temp_img)
 
 
-        # Wolke
+        ### Wolke
         temppainter.setPen(Qt.white)
         temppainter.setBrush(Qt.white)
+        # Bewegung der Wolke
         self.cloudX = round(self.cloudX + self.wind/10)
-        if self.cloudX < 0 -25:
-            self.cloudX = 1000
-        if self.cloudX > 1000 + 25:
-                self.cloudX = 0
-        temppainter.drawEllipse(self.cloudX-25,self.cloudY, 50, 50)
+        if self.cloudX < 0 -25 - 15 - 25 - 20:
+            self.cloudX = 1000 + 25 + 15 + 25 + 20
+        if self.cloudX > 1000 + 25 + 15 + 25 + 20:
+                self.cloudX = 0 - 25
+        #Zeichnen der Wolke
+        temppainter.drawEllipse(self.cloudX - 25,self.cloudY, 50, 50)
+        temppainter.drawEllipse(self.cloudX - 25 - 15, self.cloudY - 15, 50, 50)
+        temppainter.drawEllipse(self.cloudX - 25 - 15 - 25, self.cloudY - 15 - 10, 50, 50)
+        temppainter.drawEllipse(self.cloudX - 25 - 15 - 25 - 20, self.cloudY - 15 + 20, 50, 50)
+        temppainter.drawEllipse(self.cloudX - 25 - 15 - 25 + 10, self.cloudY - 15 + 17, 50, 50)
 
 
 
