@@ -19,7 +19,7 @@ class Player:
         self.pY = y
         self.fuel = 100
         self.angle = ang
-        self.health = 1000000
+        self.health = 1000
         self.power = 0
 
     # Bewegung des Spielers. Man kann nicht über den Rand hinaus fahren
