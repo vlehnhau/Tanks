@@ -48,8 +48,17 @@ for x in range(width):
             elif y-round(int((y_vals[x] + 1) * height/2) + 75)<92:
                 world[y, x] = [60, 60, 60, 255]
             else:
-                world[y, x] = [0, 0, 0, 255]
-
+                rdmC = random.randint(1, 5)
+                if rdmC == 1:
+                    world[y, x] = [0, 0, 0, 255]
+                elif rdmC == 2:
+                    world[y, x] = [25, 25, 25, 255]
+                elif rdmC == 3:
+                    world[y, x] = [15, 15, 15, 255]
+                elif rdmC == 4:
+                    world[y, x] = [20, 20, 20, 255]
+                elif rdmC == 5:
+                    world[y, x] = [30, 30, 30, 255]
 
 
 # Konvertiere das 2D Numpy-Array in ein QImage
