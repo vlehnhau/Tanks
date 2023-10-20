@@ -126,7 +126,10 @@ class Window(QWidget, object):
         ### Wind wird zufällig berechent
         self.wind = random.randint(-50, 50)
         print("Wind: " + str(self.wind))
-        #self.wind = 50
+
+        ### Wolke
+        self.cloudX, self.cloudY = 200, 70
+
 
 
 
@@ -380,7 +383,22 @@ class Window(QWidget, object):
         # Painter für temp
         temppainter = QPainter(self.temp_img)
 
+
+        # Wolke
+        temppainter.setPen(Qt.white)
+        temppainter.setBrush(Qt.white)
+        self.cloudX = round(self.cloudX + self.wind/10)
+        if self.cloudX < 0 -25:
+            self.cloudX = 1000
+        if self.cloudX > 1000 + 25:
+                self.cloudX = 0
+        temppainter.drawEllipse(self.cloudX-25,self.cloudY, 50, 50)
+
+
+
+
         # Schuss
+        temppainter.setPen(Qt.black)
         temppainter.setBrush(Qt.black)
         temppainter.drawEllipse(self.current_shoot.sX, self.current_shoot.sY, 5, 5)
 
