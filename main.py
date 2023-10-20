@@ -389,7 +389,7 @@ class Window(QWidget, object):
         temppainter.setBrush(Qt.white)
         # Bewegung der Wolke
         self.cloudX = round(self.cloudX + self.wind/10)
-        if self.cloudX < 0 -25 - 15 - 25 - 20:
+        if self.cloudX < 0 -25:
             self.cloudX = 1000 + 25 + 15 + 25 + 20
         if self.cloudX > 1000 + 25 + 15 + 25 + 20:
                 self.cloudX = 0 - 25
