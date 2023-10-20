@@ -85,7 +85,7 @@ class Window(QWidget, object):
         # self.display.setGeometry(QRect(0, 0, 1000, 400))
         self.display.setAutoFillBackground(True)
         palette = self.display.palette()
-        palette.setColor(QPalette.Window, QColor(137, 207, 240))  # Set the background color to blue
+        palette.setColor(QPalette.Window, QColor(120, 180, 255))  # Set the background color to blue
         self.display.setPalette(palette)
 
         # Widget und Layout hinzufügen
