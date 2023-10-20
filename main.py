@@ -93,7 +93,7 @@ class Window(QWidget, object):
         self.setLayout(self.form)
 
         # world
-        self.world = standardMap.worldData()
+        self.world  = standardMap.worldData()
         self.world_img = QImage(self.world.data, 1000, 600, QImage.Format_RGBA8888)
 
         ### Runden
@@ -119,6 +119,11 @@ class Window(QWidget, object):
                                   round(int((np.sin(2 * np.pi * 900 / 1000) * 0.3 + 1) * 600/2)+75),
                                   -135)
 
+        self.player_left.pY = 50
+        self.player_right.pY = 50
+
+        self.fixY(self.player_left)
+        self.fixY(self.player_right)
 
         ### Schuss (Wir benutzen immer wieder den selben Schuss)
         self.current_shoot = Shot()
@@ -260,8 +265,8 @@ class Window(QWidget, object):
         # Auffälligkeit: Wird ein Geschoss durch einen Panzer fliegen, wird das Geschoss trotzdem erst am Boden auftreffen
         # Aber ist ein Feature, kein Bug
         pixel_value = self.world_img.pixel(x,y)
-        color = QColor(pixel_value)
-        if color == QColor(128, 128, 128, 255):
+        color = QColor(pixel_value)                     #75,70,60,0
+        if color == QColor(128, 128, 128, 255) or color ==QColor(100,100,100,255) or color == QColor(90,90,90,255) or color == QColor(85, 85, 85, 255) or color == QColor(80, 80, 80, 255) or color == QColor(75,75,75,255) or color == QColor(70,70,70,255) or color == QColor(60,60,60,255) or color == QColor(1,1,1,255):
             return True
         else:
             return False
