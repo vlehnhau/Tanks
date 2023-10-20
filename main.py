@@ -283,8 +283,6 @@ class Window(QWidget, object):
         self.mappainter.drawEllipse(self.current_shoot.sX-25,self.current_shoot.sY-40, 50, 50)
         self.fixY(self.player_left)
         self.fixY(self.player_right)
-        if self.turn == "PR" and self.ki:
-            self.ki_last_hit = self.current_shoot.sX
 
         #Schaden berechnen:
         self.calcDMG()
@@ -297,6 +295,8 @@ class Window(QWidget, object):
             self.turn = "PR"
 
         elif self.turn == "PR":
+            if self.ki:
+                self.ki_last_hit = self.current_shoot.sX
             self.player_left.fuel = 100
             self.player_left.power = 0
             self.time = 0
@@ -492,7 +492,7 @@ class Window(QWidget, object):
         if self.turn == "PR" and self.ki:
             self.do_ki()
         else:
-            self.kimove = random.randint(20, 80)
+            self.kimove = 0#random.randint(20, 80)
             self.kishot = False
             self.kimoved = 0
 
@@ -518,17 +518,19 @@ class Window(QWidget, object):
                 self.player_right.angle = 240 + random.randint(-10,10)
                 self.curPower = 50 + random.randint(-5,5)
                 self.player_right.power = self.curPower
-            elif self.player_left.pX - self.ki_last_hit > 0:
-                self.player_right.angle = self.player_right.angle + 5
-                self.player_right.power = self.curPower - 5
-            elif self.player_left.pX - self.ki_last_hit > 0:
-                self.player_right.angle = self.player_right.angle - 5
-                self.player_right.power = self.curPower + 5
+            elif self.player_left.pX - self.ki_last_hit > -10:                                            # Eintreffer rechts von Gegner
+                self.player_right.angle = self.player_right.angle + 1#(1 + random.randint(1,2))
+                self.player_right.power = self.curPower  #(1 + random.randint(1,2))
+            elif self.player_left.pX - self.ki_last_hit < 10:                                            # Eintreffer links von Gegner
+                self.player_right.angle = self.player_right.angle - 1#(1 + random.randint(1,2))
+                self.player_right.power = self.curPower #(1 + random.randint(1,2))
             elif self.player_left.pX - self.ki_last_hit == 0:
                 pass
 
             self.shoot(self.player_right)
             self.kishot = True
+
+            print(self.player_left.pX - self.ki_last_hit)
 
 
 app = QApplication(sys.argv)
