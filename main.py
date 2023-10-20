@@ -19,7 +19,7 @@ class Player:
         self.pY = y
         self.fuel = 100
         self.angle = ang
-        self.health = 1000
+        self.health = 1000000
         self.power = 0
 
     # Bewegung des Spielers. Man kann nicht über den Rand hinaus fahren
@@ -140,8 +140,8 @@ class Window(QWidget, object):
 
         self.mappainter = QPainter(self.world_img)
         # self.mappainter.setCompositionMode(QPainter.CompositionMode_Clear)
-        self.mappainter.setPen(QColor(137, 207, 240, 255))
-        self.mappainter.setBrush(QColor(137, 207, 240, 255))
+        self.mappainter.setPen(QColor(120, 180, 255))
+        self.mappainter.setBrush(QColor(120, 180, 255))
 
         #Hiermit werden später die Krater gezeichnet
         #self.mappainter.drawEllipse(QPoint(60, 434), 50, 50)
@@ -266,7 +266,7 @@ class Window(QWidget, object):
         # Aber ist ein Feature, kein Bug
         pixel_value = self.world_img.pixel(x,y)
         color = QColor(pixel_value)                     #75,70,60,0
-        if color == QColor(128, 128, 128, 255) or color ==QColor(100,100,100,255) or color == QColor(90,90,90,255) or color == QColor(85, 85, 85, 255) or color == QColor(80, 80, 80, 255) or color == QColor(75,75,75,255) or color == QColor(70,70,70,255) or color == QColor(60,60,60,255) or color == QColor(1,1,1,255):
+        if color == QColor(128, 128, 128, 255) or color ==QColor(100,100,100,255) or color == QColor(90,90,90,255) or color == QColor(85, 85, 85, 255) or color == QColor(80, 80, 80, 255) or color == QColor(75,75,75,255) or color == QColor(70,70,70,255) or color == QColor(60,60,60,255) or color == QColor(1,1,1,255) or color == QColor(25, 25, 25, 255) or color == QColor(15,15,15,255) or color == QColor(20,20,20,255) or color == QColor(30,30,30,255):
             return True
         else:
             return False
