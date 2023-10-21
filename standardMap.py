@@ -50,7 +50,7 @@ for x in range(width):
             else:
                 rdmC = random.randint(1, 5)
                 if rdmC == 1:
-                    world[y, x] = [0, 0, 0, 255]
+                    world[y, x] = [1, 1, 1, 255]
                 elif rdmC == 2:
                     world[y, x] = [25, 25, 25, 255]
                 elif rdmC == 3:
