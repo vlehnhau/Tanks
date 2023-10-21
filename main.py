@@ -539,7 +539,7 @@ class Window(QWidget, object):
         if self.turn == "PR" and self.ki:
             self.do_ki()
         else:
-            self.kimove = 0 #random.randint(20, 80)
+            self.kimove = random.randint(20, 80)
             self.kishot = False
             self.kimoved = 0
 
@@ -589,12 +589,22 @@ app.exec()
 
 
 ## Viktor:
-# KI
-# Random Map
-# Boden schön
-#
+# KI                    -> do it later (vlt.)
+# Random Map            -> done
+# Boden schön           -> done
+# Partikel              -> in progress
 #
 ## Mika:
-# Wind
-# Wolken
-# Parikel
+# Wind                  -> done
+# Wolken                -> done aber noch mehr digga
+# nicht durch wände     ->
+# schräg fahren         ->
+
+
+# -> background noch schöner? (also vlt berge und so) (wird aber vlt schwer, weil dann einschlagkerise nicht mehr einfach blau gemacht werden können)
+# -> nicht mehr vorbeifahren
+# -> startscrren -> ki, oder nicht
+# -> endscreen -> restart und wer hat gewonnen junge
+#
+#
+#

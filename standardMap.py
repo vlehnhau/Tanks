@@ -15,7 +15,7 @@ world = np.zeros((height, width, 4), dtype=np.uint8)
 w = np.linspace(0.001,0.05,20)
 
 x_vals = np.arange(width)
-y_vals = 0 #np.sin(2* np.pi * x_vals / width) * 0.3  # Sinuskurve
+y_vals = 0#np.sin(2* np.pi * x_vals / width) * 0.3  # Sinuskurve
 
 for i in w:
     y_vals = y_vals + (1/np.sqrt(i)*np.sin(i*x_vals + random.uniform(0, 2*np.pi))*random.uniform(-1,1)) * 0.009
