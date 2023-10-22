@@ -133,7 +133,9 @@ class Window(QWidget, object):
         print("Wind: " + str(self.wind))
 
         ### Wolke
-        self.cloudX, self.cloudY = 200, 70
+        self.cloud1X, self.cloud1Y = 180, 40
+        self.cloud2X, self.cloud2Y = 560, 120
+        self.cloud3X, self.cloud3Y = 940, 70
 
 
 
@@ -354,6 +356,7 @@ class Window(QWidget, object):
 
 
     def shootOutOfWorld(self):
+        self.wind = random.randint(-50, 50)
         if self.turn == "PL":
             self.player_right.fuel = 100
             self.player_right.power = 0
@@ -397,19 +400,47 @@ class Window(QWidget, object):
         ### Wolke
         temppainter.setPen(Qt.white)
         temppainter.setBrush(Qt.white)
-        # Bewegung der Wolke
-        self.cloudX = round(self.cloudX + self.wind/10)
-        if self.cloudX < 0 -25:
-            self.cloudX = 1000 + 25 + 15 + 25 + 20
-        if self.cloudX > 1000 + 25 + 15 + 25 + 20:
-                self.cloudX = 0 - 25
-        #Zeichnen der Wolke
-        temppainter.drawEllipse(self.cloudX - 25,self.cloudY, 50, 50)
-        temppainter.drawEllipse(self.cloudX - 25 - 15, self.cloudY - 15, 50, 50)
-        temppainter.drawEllipse(self.cloudX - 25 - 15 - 25, self.cloudY - 15 - 10, 50, 50)
-        temppainter.drawEllipse(self.cloudX - 25 - 15 - 25 - 20, self.cloudY - 15 + 20, 50, 50)
-        temppainter.drawEllipse(self.cloudX - 25 - 15 - 25 + 10, self.cloudY - 15 + 17, 50, 50)
+        # Bewegung der Wolke 1
+        self.cloud1X = round(self.cloud1X + self.wind/10)
+        if self.cloud1X < 0 -25:
+            self.cloud1X = 1000 + 150
+        if self.cloud1X > 1000 + 150:
+                self.cloud1X = 0 - 25
+        #Zeichnen der Wolke 1
+        temppainter.drawEllipse(self.cloud1X - 25, self.cloud1Y, 50, 50)                            # ganz rechts
+        temppainter.drawEllipse(self.cloud1X - 35 - 15, self.cloud1Y - 15, 50, 50)
+        temppainter.drawEllipse(self.cloud1X - 25 - 15 - 25, self.cloud1Y - 15 - 10, 50, 50)
+        temppainter.drawEllipse(self.cloud1X - 25 - 15 - 25 - 20, self.cloud1Y - 15 + 20, 50, 50)   # ganz links
+        temppainter.drawEllipse(self.cloud1X - 25 - 15 - 25 + 10, self.cloud1Y - 15 + 17, 50, 50)
 
+        # Bewegung der Wolke 2
+        self.cloud2X = round(self.cloud2X + self.wind / 10)
+        if self.cloud2X < 0 - 25:
+            self.cloud2X = 1000 + 150
+        if self.cloud2X > 1000 + 150:
+            self.cloud2X = 0 - 25
+        # Zeichnen der Wolke 2
+        temppainter.drawEllipse(self.cloud2X - 20, self.cloud2Y, 40, 40)            # ganz rechts
+        temppainter.drawEllipse(self.cloud2X - 20 - 50, self.cloud2Y - 25, 60, 60)
+        temppainter.drawEllipse(self.cloud2X - 20 - 85, self.cloud2Y - 10, 50, 50)  # ganz links
+        temppainter.drawEllipse(self.cloud2X - 20 - 55, self.cloud2Y + 10, 40, 40)
+        temppainter.drawEllipse(self.cloud2X - 20 - 30, self.cloud2Y + 5, 40, 40)
+
+
+
+        # Bewegung der Wolke 3
+        self.cloud3X = round(self.cloud3X + self.wind / 10)
+        if self.cloud3X < 0 - 25:
+            self.cloud3X = 1000 + 150
+        if self.cloud3X > 1000 + 150:
+            self.cloud3X = 0 - 25
+        # Zeichnen der Wolke 3
+        temppainter.drawEllipse(self.cloud3X - 10, self.cloud3Y - 5, 20, 20)        # ganz rechts
+        temppainter.drawEllipse(self.cloud3X - 10 - 10, self.cloud3Y - 17, 20, 20)
+        temppainter.drawEllipse(self.cloud3X - 10 - 35, self.cloud3Y - 25, 30, 30)
+        temppainter.drawEllipse(self.cloud3X - 10 - 60, self.cloud3Y - 15, 34, 34) # ganz links
+        temppainter.drawEllipse(self.cloud3X - 10 - 45, self.cloud3Y, 35, 35)
+        temppainter.drawEllipse(self.cloud3X - 10 - 25, self.cloud3Y - 5, 35, 35)
 
 
 
@@ -568,7 +599,7 @@ class Window(QWidget, object):
             elif self.player_left.pX - self.ki_last_hit > -10:                                            # Eintreffer rechts von Gegner
                 self.player_right.angle = self.player_right.angle + 1#(1 + random.randint(1,2))
                 self.player_right.power = self.curPower  #(1 + random.randint(1,2))
-            elif self.player_left.pX - self.ki_last_hit < 10:                                            # Eintreffer links von Gegner
+            elif self.player_left.pX - self.ki_last_hit < 10:                                             # Eintreffer links von Gegner
                 self.player_right.angle = self.player_right.angle - 1#(1 + random.randint(1,2))
                 self.player_right.power = self.curPower #(1 + random.randint(1,2))
             elif self.player_left.pX - self.ki_last_hit == 0:
@@ -578,6 +609,7 @@ class Window(QWidget, object):
             self.kishot = True
 
             print(self.player_left.pX - self.ki_last_hit)
+
 
 app = QApplication(sys.argv)
 
