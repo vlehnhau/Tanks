@@ -80,6 +80,20 @@ class Window(QWidget, object):
         # create board
         self.board = QtGui.QPixmap(1000, 600)
 
+        self.particle = False
+        self.particlesX = []
+        self.particlesY = []
+        self.particleColor = []
+        self.particleAngle = []
+        self.particlePower = []
+        self.particleFlying = []
+
+        for i in range(0, 100):
+            self.particlesX.append(0)
+            self.particlesY.append(0)
+            self.particleAngle.append(0)
+            self.particlePower.append(0)
+            self.particleFlying.append(False)
 
         self.display = QLabel()
         # self.display.setGeometry(QRect(0, 0, 1000, 400))
@@ -100,12 +114,14 @@ class Window(QWidget, object):
         self.turn = "PL" #Links darf anfangen
 
         ### ki init
-        self.ki = True #Ki Gegner
+        #self.ki = True Ki Gegner
         self.kimove = 0
         self.kimoved = 0
         self.kishot = False
         self.ki_last_hit = -100000
         self.curPower = 0
+
+        self.timeSafe = 0
 
         ### Player Left (grün)
         self.player_left = Player(QColor(0, 150, 0, 255),
@@ -155,6 +171,8 @@ class Window(QWidget, object):
 
         self.spacepressed = False
 
+    def kisettings(self, val):
+        self.ki = val
     def timerFun(self):
         # timer
         self.timer = QTimer()
@@ -304,6 +322,44 @@ class Window(QWidget, object):
                 self.current_shoot.flies = False
                 self.shootOutOfWorld()
 
+    def doparticle(self):
+        g = 0.005
+        self.timeSafe += 1
+
+        for i in range(0, 50):
+            if self.particleFlying[i] != False:
+
+                horizontal_force = (self.particlePower[i] / 4) * math.cos(
+                    math.radians(-self.particleAngle[i]))
+
+                # Berechne die vertikale Komponente der Schusskraft (Y- Koord)
+                vertical_force = (self.particlePower[i] / 4) * math.sin(
+                    math.radians(-self.particleAngle[i]))
+
+                # Aktualisiere die vertikale Position (y) -> (Verticalforce - Schwerkraft)
+                self.particlesY[i] = self.particlesY[i] - round(vertical_force - (g * (self.timeSafe ** 2) / 2))
+                # Aktualisiere die horizontale Position (x) unter Verwendung der horizontalen Schusskraft (<-- +/- Wind)
+
+                self.particlesX[i] += round(horizontal_force + self.wind / 20)
+
+            # Aktualisiere die Zeit (für die parabolische Bewegung
+
+
+            if self.checkGround(self.particlesX[i], self.particlesY[i]):
+                self.particleFlying[i] = False
+                counter = 0
+                for i in range(0, 50):
+                    if self.particleFlying[i]:
+                        counter = counter + 1
+
+                if counter >= 95:
+                    self.particle = False
+                    self.timeSafe = 0
+
+            # elif self.current_shoot.sX <= 0 or self.current_shoot.sX >= 1000 or self.current_shoot.sY > 600:
+            #     self.current_shoot.flies = False
+            #     self.shootOutOfWorld()
+
 
     def shotHitGround(self, x, y):
         print("Treffer")
@@ -316,6 +372,15 @@ class Window(QWidget, object):
             self.fixY(self.player_left)
             self.fixY(self.player_right)
 
+        self.particle = True
+        for i in range(0, 50):
+            self.particlesX[i] = x + random.randint(-15, 15)
+            self.particlesY[i] = y + random.randint(-15 , 15)
+            self.particleAngle[i] = random.randint(220,300)
+            self.particlePower[i] = random.randint(2,20)
+            self.particleFlying[i] = True
+
+
         #Schaden berechnen:
         self.calcDMG()
 
@@ -323,6 +388,7 @@ class Window(QWidget, object):
             self.player_right.fuel = 100
             self.player_right.power = 0
             self.time = 0
+            self.timeSafe = 0
             self.current_shoot.sX, self.current_shoot.sY = 500,2000
             self.turn = "PR"
             self.wind = random.randint(-50, 50)
@@ -334,11 +400,11 @@ class Window(QWidget, object):
             self.player_left.fuel = 100
             self.player_left.power = 0
             self.time = 0
+            self.timeSafe = 0
             self.current_shoot.sX, self.current_shoot.sY = 500,2000
             self.turn = "PL"
             self.wind = random.randint(-50, 50)
             print("Wind: " + str(self.wind))
-
 
     def calcDMG(self):
         # Schaden von Player Left
@@ -361,6 +427,7 @@ class Window(QWidget, object):
             self.player_right.fuel = 100
             self.player_right.power = 0
             self.time = 0
+            self.timeSafe =0
             self.current_shoot.sX, self.current_shoot.sY = 500,2000
             self.turn = "PR"
 
@@ -368,6 +435,7 @@ class Window(QWidget, object):
             self.player_left.fuel = 100
             self.player_left.power = 0
             self.time = 0
+            self.timeSafe = 0
             self.current_shoot.sX, self.current_shoot.sY = 500,2000
             self.turn = "PL"
 
@@ -389,6 +457,9 @@ class Window(QWidget, object):
 
         if self.current_shoot.flies == True:
             self.moveShot()
+
+        if self.particle:
+            self.doparticle()
 
         # temporäres Bild (Kopie von world_img)
         self.temp_img = QImage(self.world_img)
@@ -449,6 +520,26 @@ class Window(QWidget, object):
         temppainter.setBrush(Qt.black)
         temppainter.drawEllipse(self.current_shoot.sX, self.current_shoot.sY, 5, 5)
 
+        # Particle
+        if self.particle:
+            for i in range(0, 50):
+                if self.particleFlying[i]:
+                    karl = random.randint(1, 6)
+                    color = Qt.red
+                    if karl == 1:
+                        color = Qt.yellow
+                    elif karl == 2:
+                        color = QColor(255, 20, 20, 255)
+                    elif karl == 3:
+                        color = QColor(255, 200, 20, 255)
+                    elif karl == 4:
+                        color = QColor(245, 93, 12, 255)
+                    elif karl == 5:
+                        color = QColor(200, 20, 14, 255)
+
+                    temppainter.setPen(color)
+                    temppainter.setBrush(color)
+                    temppainter.drawEllipse(self.particlesX[i], self.particlesY[i], 4, 4)
 
         # Player Left zeichnen
         temppainter.setPen(Qt.black)
@@ -611,10 +702,48 @@ class Window(QWidget, object):
             print(self.player_left.pX - self.ki_last_hit)
 
 
+class Ui_MainWindow(object):
+    def __init__(self, winIn: Window):
+        super().__init__()
+        self.timer = QTimer()
+        self.game = winIn
+
+    def setupUi(self, MainWindow):
+        MainWindow.setObjectName("MainWindow")
+        MainWindow.resize(343, 321)
+        self.centralwidget = QWidget(parent=MainWindow)
+        self.centralwidget.setObjectName("centralwidget")
+
+        # button
+        self.submitki = QPushButton(parent=self.centralwidget, clicked=self.submitKi, text="PvE")  # Button submit settings
+        self.submitki.setGeometry(QRect(20, 130, 113, 32))
+        self.submitki.setObjectName("submitPvE")
+
+        self.submitPvP = QPushButton(parent=self.centralwidget, clicked=self.submitNoKi, text="PvP")  # Button submit settings
+        self.submitPvP.setGeometry(QRect(200, 130, 113, 32))
+        self.submitPvP.setObjectName("submitPvP")
+
+        MainWindow.setCentralWidget(self.centralwidget)
+
+    def submitNoKi(self):
+        self.game.kisettings(False)
+        self.game.show()
+        MainWindow.close()
+    def submitKi(self):
+        self.game.kisettings(True)
+        self.game.show()
+        MainWindow.close()
+
+
 app = QApplication(sys.argv)
 
+
 win = Window()
-win.show()
+
+MainWindow = QMainWindow()
+ui = Ui_MainWindow(win)
+ui.setupUi(MainWindow)
+MainWindow.show()
 
 app.exec()
 
@@ -622,21 +751,11 @@ app.exec()
 
 ## Viktor:
 # KI                    -> do it later (vlt.)
-# Random Map            -> done
-# Boden schön           -> done
-# Partikel              -> in progress
+# endscreen -> restart und wer hat gewonnen junge
 #
 ## Mika:
-# Wind                  -> done
-# Wolken                -> done aber noch mehr digga
 # nicht durch wände     ->
-# schräg fahren         ->
-
-
-# -> background noch schöner? (also vlt berge und so) (wird aber vlt schwer, weil dann einschlagkerise nicht mehr einfach blau gemacht werden können)
-# -> nicht mehr vorbeifahren
-# -> startscrren -> ki, oder nicht
-# -> endscreen -> restart und wer hat gewonnen junge
+# nicht mehr vorbeifahren
 #
 #
 #

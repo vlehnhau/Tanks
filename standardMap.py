@@ -62,7 +62,7 @@ for x in range(width):
 
 
 # Konvertiere das 2D Numpy-Array in ein QImage
-# world_img = QImage(world.data, width, height, QImage.Format_RGB888)
+# world_img = QImage(world.data, width, heighgvbt, QImage.Format_RGB888)
 
 def worldData():
     return world
