@@ -381,7 +381,7 @@ class Window(QWidget, object):
             self.particleFlying[i] = True
 
 
-        #Schaden berechnen:
+        # Schaden berechnen:
         self.calcDMG()
 
         if self.turn == "PL":
@@ -389,7 +389,7 @@ class Window(QWidget, object):
             self.player_right.power = 0
             self.time = 0
             self.timeSafe = 0
-            self.current_shoot.sX, self.current_shoot.sY = 500,2000
+            self.current_shoot.sX, self.current_shoot.sY = 500, 2000
             self.turn = "PR"
             self.wind = random.randint(-50, 50)
             print("Wind: " + str(self.wind))
@@ -634,7 +634,11 @@ class Window(QWidget, object):
             temppainter.drawRect(6, 6, round(self.player_left.health / 5), 10)
         else:  # Rot hat gewonnen
             print("Rot hat gewonnen")
+            msg = QMessageBox()
+            msg.setWindowTitle("GAME OVER")
+            msg.setText("The winner is red")
             self.timer.stop()
+            msg.exec()
 
         # Healthbar (Player Right)
         temppainter.setBrush(Qt.black)
@@ -651,7 +655,11 @@ class Window(QWidget, object):
             temppainter.drawRect(0, -10, round(self.player_right.health / 5), 10)
         else:   # Grün hat gewonnen
             print("Grün hat gewonnen")
+            msg = QMessageBox()
+            msg.setWindowTitle("GAME OVER")
+            msg.setText("The winner is green")
             self.timer.stop()
+            msg.exec()
 
         temppainter.resetTransform()
 
