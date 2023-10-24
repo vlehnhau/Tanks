@@ -195,12 +195,25 @@ class Window(QWidget, object):
         # Spieler bewegen falls möglich
         if  QKeyEvent.key() == Qt.Key.Key_Right:
             if self.checkIfMovePossible(player.pX+1, player.pY):
-                player.move("RIGHT")
-                self.fixY(player)
+                if self.turn == "PL":   # Die Panzer können nicht einander vorbeifahren
+                    playerdiff = self.player_right.pX + 1  - self.player_left.pX
+                    if playerdiff > 45:
+                        player.move("RIGHT")
+                        self.fixY(player)
+                else:
+                    player.move("RIGHT")
+                    self.fixY(player)
         elif QKeyEvent.key() == Qt.Key.Key_Left:
             if self.checkIfMovePossible(player.pX-1, player.pY):
-                player.move("LEFT")
-                self.fixY(player)
+                if self.turn == "PR":   # Die Panzer können nicht einander vorbeifahren
+                    playerdiff = self.player_right.pX - self.player_left.pX - 1
+                    if playerdiff > 45:
+                        player.move("LEFT")
+                        self.fixY(player)
+                else:
+                    player.move("LEFT")
+                    self.fixY(player)
+
 
         # angle ändern (Taste UP = Rechts, Taste Down = Links (Wie Blinker))
         elif QKeyEvent.key() == Qt.Key_Up:
@@ -232,10 +245,19 @@ class Window(QWidget, object):
 
 
     # Dadurch kann man nichtmehr zu Steile Kanten hoch- oder runterfahren
-    def checkIfMovePossible(self,x,y):                #Man kann nicht hochfahren, wenn zu Nah über einen Boden ist
+    def checkIfMovePossible(self,x,y):
         if self.current_shoot.flies == False:         #Man kann nicht fahren, wenn man schon geschossen hat
             if (self.checkGround(x,y-25) == True):
                 return False
+            if self.turn == "PL":
+                playerdiff = round(math.sqrt((self.player_left.pX + 1 - self.player_right.pX)**2 + ((self.player_left.pY - 12) - (self.player_right.pY - 12))**2))
+                if playerdiff < 45:
+                    return False
+            elif self.turn == "PR":
+                playerdiff = round(math.sqrt((self.player_left.pX - self.player_right.pX - 1)**2 + ((self.player_left.pY - 12) - (self.player_right.pY - 12))**2))
+                if playerdiff < 45:
+                    return False
+
             if (self.checkGround(x,y) == True):           #Man will hoch fahren
                 if (self.checkGround(x,y-6) == True):
                     return False
