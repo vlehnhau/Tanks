@@ -315,7 +315,6 @@ class Window(QWidget, object):
 
 
     def moveShot(self):
-        # Gravitational constant (in pixel per frame squared)
         g = 0.005
 
         if self.current_shoot.flies:
@@ -334,7 +333,7 @@ class Window(QWidget, object):
             self.current_shoot.sX += round(horizontal_force + self.wind/20)
 
 
-            # Aktualisiere die Zeit (für die parabolische Bewegung)
+            # Aktualisiere die Zeit
             self.time += 1
 
             if self.checkGround(self.current_shoot.sX, self.current_shoot.sY):
@@ -343,6 +342,51 @@ class Window(QWidget, object):
             elif self.current_shoot.sX <= 0 or self.current_shoot.sX >= 1000 or self.current_shoot.sY > 600:
                 self.current_shoot.flies = False
                 self.shootOutOfWorld()
+
+
+
+    # Andere moveShot funktion ohne "Kraterbug". Aber irgendwie ist dauerhaft Player Left dran, verstehe nicht wieso
+    # def moveShot(self):
+    #     # Gravitational constant
+    #     g = 0.005
+    #
+    #     if self.current_shoot.flies:
+    #         # Berechne die horizontale Komponente der Schusskraft (X- Koord)
+    #         horizontal_force = (self.current_shoot.shot_power/4) * math.cos(
+    #             math.radians(-self.current_shoot.shot_angle))
+    #
+    #         # Berechne die vertikale Komponente der Schusskraft (Y- Koord)
+    #         vertical_force = (self.current_shoot.shot_power/4) * math.sin(math.radians(-self.current_shoot.shot_angle))
+    #
+    #         # Aktualisiere die vertikale Position (y) -> (Verticalforce - Schwerkraft)
+    #         Yshift = round(vertical_force - (g * (self.time ** 2)/2))
+    #
+    #         # Aktualisiere die horizontale Position (x) unter Verwendung der horizontalen Schusskraft (<-- +/- Wind)
+    #
+    #         Xshift = round(horizontal_force + self.wind/20)
+    #         foundGround = False
+    #
+    #
+    #         for i in range(1,101):
+    #             if self.checkGround(round(self.current_shoot.sX + i/100 * Xshift), round(self.current_shoot.sY - i/100 * Yshift)) and foundGround == False:
+    #                 foundGround = True
+    #                 self.current_shoot.flies = False
+    #                 self.current_shoot.sX += round(i/100 * Xshift)
+    #                 self.current_shoot.sY -= round(i/100 * Yshift)
+    #                 self.current_shoot.flies = False
+    #                 self.shotHitGround(self.current_shoot.sX, self.current_shoot.sY)
+    #
+    #         if foundGround == False:
+    #             self.current_shoot.sX += Xshift
+    #             self.current_shoot.sY -= Yshift
+    #
+    #         self.time += 1
+    #
+    #
+    #
+    #         if self.current_shoot.sX <= 0 or self.current_shoot.sX >= 1000 or self.current_shoot.sY > 600:
+    #             self.current_shoot.flies = False
+    #             self.shootOutOfWorld()
 
     def doparticle(self):
         g = 0.005
@@ -364,7 +408,6 @@ class Window(QWidget, object):
 
                 self.particlesX[i] += round(horizontal_force + self.wind / 20)
 
-            # Aktualisiere die Zeit (für die parabolische Bewegung
 
 
             if self.checkGround(self.particlesX[i], self.particlesY[i]):
@@ -405,7 +448,6 @@ class Window(QWidget, object):
 
         # Schaden berechnen:
         self.calcDMG()
-
         if self.turn == "PL":
             self.player_right.fuel = 100
             self.player_right.power = 0
