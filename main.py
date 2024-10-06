@@ -818,16 +818,3 @@ ui.setupUi(MainWindow)
 MainWindow.show()
 
 app.exec()
-
-
-
-## Viktor:
-# KI                    -> do it later (vlt.)
-# endscreen -> restart und wer hat gewonnen junge
-#
-## Mika:
-# nicht durch wände     ->
-# nicht mehr vorbeifahren
-#
-#
-#
